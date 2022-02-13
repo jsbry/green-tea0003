@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image/color"
 	"log"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -23,19 +22,30 @@ var (
 	shotCooltime int
 )
 
+type Shot struct {
+	img        *ebiten.Image
+	startFrame int
+	x          float64
+	y          float64
+}
+
 func (g *Game) drawShot(screen *ebiten.Image) {
 	if shotCooltime == 0 {
 		for _, k := range g.input.Keys {
 			switch k {
 			case ebiten.KeySpace:
-				var err error
 
 				shotCooltime++
-				g.shotImg[shotNum], _, err = ebitenutil.NewImageFromFile("game/resource/img/shot.png")
+				img, _, err := ebitenutil.NewImageFromFile("game/resource/img/shot.png")
 				if err != nil {
 					log.Fatal(err)
 				}
-				go g.moveShot(screen, shotNum, rocketX)
+				g.shotImg[shotNum] = Shot{
+					img:        img,
+					startFrame: g.count,
+					x:          rocketX,
+					y:          rocketY,
+				}
 
 				shotNum++
 				if shotNum >= MaxShotNum {
@@ -45,6 +55,7 @@ func (g *Game) drawShot(screen *ebiten.Image) {
 			}
 		}
 	}
+
 	if shotCooltime > 0 {
 		shotCooltime++
 	}
@@ -53,17 +64,23 @@ func (g *Game) drawShot(screen *ebiten.Image) {
 	}
 }
 
-func (g *Game) moveShot(screen *ebiten.Image, shotNum int, x float64) {
-	for y := rocketY; y > 0; y -= SHOT_SPEED {
-		op := &ebiten.DrawImageOptions{}
-		op.GeoM.Scale(SHOT_SCALE, SHOT_SCALE)
-		op.GeoM.Translate(x+12, y-40)
+func (g *Game) moveShot(screen *ebiten.Image) {
+	for shotNum, v := range g.shotImg {
+		if v.img != nil {
+			g.shotImg[shotNum].y -= SHOT_SPEED
+			v.y -= SHOT_SPEED
 
-		text.Draw(screen, fmt.Sprintf("shotNum: %d, shotX, shotY:%d, %d", shotNum, int(x+12), int(y-40)), mplusbitmap.Gothic12r, 5, 133+(20*shotNum), color.White)
+			op := &ebiten.DrawImageOptions{}
+			op.GeoM.Scale(SHOT_SCALE, SHOT_SCALE)
+			op.GeoM.Translate(v.x+12, v.y-40)
 
-		screen.DrawImage(g.shotImg[shotNum], op)
-		time.Sleep(1 * time.Millisecond)
+			text.Draw(screen, fmt.Sprintf("shotNum: %d, shotX, shotY:%d, %d", shotNum, int(v.x+12), int(v.y-40)), mplusbitmap.Gothic12r, 5, 133+(20*shotNum), color.White)
+			screen.DrawImage(v.img, op)
+
+			if v.y < 0 {
+				g.shotImg[shotNum].img.Dispose()
+				g.shotImg[shotNum].img = nil
+			}
+		}
 	}
-	g.shotImg[shotNum].Dispose()
-	g.shotImg[shotNum] = nil
 }

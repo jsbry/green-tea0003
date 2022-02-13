@@ -15,7 +15,8 @@ const (
 	LayoutWidth  = 640
 	LayoutHeight = 480
 
-	MaxShotNum = 8
+	MaxShotNum  = 8
+	MaxEnemyNum = 256
 )
 
 var (
@@ -25,14 +26,17 @@ var (
 
 // debug
 var (
-	i  int
 	si string
+	ei string
 )
 
 type Game struct {
-	meImg   *ebiten.Image
-	shotImg [MaxShotNum]*ebiten.Image
-	input   *Input
+	meImg *ebiten.Image
+	// shotImg  [MaxShotNum]*ebiten.Image
+	shotImg  [MaxShotNum]Shot
+	enemyImg [MaxEnemyNum]*ebiten.Image
+	input    *Input
+	count    int
 }
 
 func NewGame() *Game {
@@ -42,6 +46,7 @@ func NewGame() *Game {
 
 	g := &Game{
 		input: NewInput(),
+		count: 0,
 	}
 
 	var err error
@@ -58,7 +63,7 @@ func NewGame() *Game {
 
 func (g *Game) Update() error {
 	g.input.Update(g)
-	i++
+	g.count++
 	// PrintMemory()
 	return nil
 }
@@ -68,12 +73,18 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	si = ""
 	for i, v := range g.shotImg {
-		if v != nil {
+		if v.img != nil {
 			si += fmt.Sprintf("%d, ", i)
 		}
 	}
+	ei = ""
+	for i, v := range g.enemyImg {
+		if v != nil {
+			ei += fmt.Sprintf("%d, ", i)
+		}
+	}
 
-	text.Draw(screen, fmt.Sprintf("update:%d", i), mplusbitmap.Gothic12r, 5, 13, color.White)
+	text.Draw(screen, fmt.Sprintf("update:%d", g.count), mplusbitmap.Gothic12r, 5, 13, color.White)
 	text.Draw(screen, fmt.Sprintf("key:%s", g.input.Keys), mplusbitmap.Gothic12r, 5, 33, color.White)
 	text.Draw(screen, fmt.Sprintf("shotImg:%#v", si), mplusbitmap.Gothic12r, 5, 53, color.White)
 	text.Draw(screen, fmt.Sprintf("shotCooltime:%d", shotCooltime), mplusbitmap.Gothic12r, 5, 73, color.White)
@@ -81,8 +92,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprintf("WindowSize():%d, %d", windowX, windowY), mplusbitmap.Gothic12r, 5, 93, color.White)
 	text.Draw(screen, fmt.Sprintf("rocketX, rocketY:%d, %d", int(rocketX), int(rocketY)), mplusbitmap.Gothic12r, 5, 113, color.White)
 
+	text.Draw(screen, fmt.Sprintf("enemyImg:%#v", ei), mplusbitmap.Gothic12r, 250, 53, color.White)
+
 	g.drawRocket(screen)
 	g.drawShot(screen)
+	g.moveShot(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
