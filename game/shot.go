@@ -62,6 +62,8 @@ func (g *Game) drawShot(screen *ebiten.Image) {
 	if shotCooltime > SHOT_COOLTIME {
 		shotCooltime = 0
 	}
+
+	g.moveShot(screen)
 }
 
 func (g *Game) moveShot(screen *ebiten.Image) {

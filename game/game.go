@@ -16,7 +16,7 @@ const (
 	LayoutHeight = 480
 
 	MaxShotNum  = 8
-	MaxEnemyNum = 256
+	MaxEnemyNum = 16
 )
 
 var (
@@ -31,10 +31,9 @@ var (
 )
 
 type Game struct {
-	meImg *ebiten.Image
-	// shotImg  [MaxShotNum]*ebiten.Image
+	meImg    *ebiten.Image
 	shotImg  [MaxShotNum]Shot
-	enemyImg [MaxEnemyNum]*ebiten.Image
+	enemyImg [MaxEnemyNum]Enemy
 	input    *Input
 	count    int
 }
@@ -79,7 +78,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 	ei = ""
 	for i, v := range g.enemyImg {
-		if v != nil {
+		if v.img != nil {
 			ei += fmt.Sprintf("%d, ", i)
 		}
 	}
@@ -92,11 +91,12 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprintf("WindowSize():%d, %d", windowX, windowY), mplusbitmap.Gothic12r, 5, 93, color.White)
 	text.Draw(screen, fmt.Sprintf("rocketX, rocketY:%d, %d", int(rocketX), int(rocketY)), mplusbitmap.Gothic12r, 5, 113, color.White)
 
-	text.Draw(screen, fmt.Sprintf("enemyImg:%#v", ei), mplusbitmap.Gothic12r, 250, 53, color.White)
+	text.Draw(screen, fmt.Sprintf("enemyImg:%#v", ei), mplusbitmap.Gothic12r, 350, 53, color.White)
 
 	g.drawRocket(screen)
 	g.drawShot(screen)
-	g.moveShot(screen)
+
+	g.drawEnemy(screen)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
