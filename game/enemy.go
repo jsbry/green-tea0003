@@ -5,7 +5,6 @@ import (
 	"image/color"
 	"log"
 	"math/rand"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -31,19 +30,18 @@ type Enemy struct {
 
 func (g *Game) drawEnemy(screen *ebiten.Image) {
 
-	img, _, err := ebitenutil.NewImageFromFile("game/resource/img/ufo.png")
-	if err != nil {
-		log.Fatal(err)
-	}
+	if g.count%50 == 0 {
+		fmt.Printf("pop : %d,  %d\n", g.count, g.count%100)
+		img, _, err := ebitenutil.NewImageFromFile("game/resource/img/ufo.png")
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	rand.Seed(time.Now().UnixNano())
-
-	if g.count == 1 || g.count%100 == 0 {
 		g.enemyImg[enemyNum] = Enemy{
 			img:        img,
 			startFrame: g.count,
-			x:          float64(rand.Intn(100) - 150),
-			y:          float64(rand.Intn(300) + 50),
+			x:          float64(rand.Intn(windowX)),
+			y:          float64(rand.Intn(100) - 150),
 		}
 
 		enemyNum++
@@ -58,8 +56,8 @@ func (g *Game) drawEnemy(screen *ebiten.Image) {
 func (g *Game) moveEnemy(screen *ebiten.Image) {
 	for enemyNum, v := range g.enemyImg {
 		if v.img != nil {
-			g.enemyImg[enemyNum].x += ENEMY_SPEED
-			v.x += ENEMY_SPEED
+			g.enemyImg[enemyNum].y += ENEMY_SPEED
+			v.y += ENEMY_SPEED
 
 			op := &ebiten.DrawImageOptions{}
 			op.GeoM.Scale(ENEMY_SCALE, ENEMY_SCALE)
@@ -68,7 +66,7 @@ func (g *Game) moveEnemy(screen *ebiten.Image) {
 			text.Draw(screen, fmt.Sprintf("enemyNum: %d, enemyX, enemyY:%d, %d", enemyNum, int(v.x+12), int(v.y-40)), mplusbitmap.Gothic12r, 350, 133+(20*enemyNum), color.White)
 			screen.DrawImage(v.img, op)
 
-			if float64(windowX) < v.x {
+			if float64(windowY) < v.y {
 				g.enemyImg[enemyNum].img.Dispose()
 				g.enemyImg[enemyNum].img = nil
 			}

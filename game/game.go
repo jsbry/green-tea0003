@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"math/rand"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
@@ -39,6 +41,8 @@ type Game struct {
 }
 
 func NewGame() *Game {
+	rand.Seed(time.Now().UnixNano())
+
 	windowX, windowY = ebiten.WindowSize()
 	rocketX = (float64(windowX) / 2) - 21
 	rocketY = float64(windowY) - 72
@@ -55,7 +59,7 @@ func NewGame() *Game {
 	}
 
 	x, y := g.meImg.Size()
-	fmt.Printf("x, y : %d, %d", x, y)
+	fmt.Printf("x, y : %d, %d\n", x, y)
 
 	return g
 }
