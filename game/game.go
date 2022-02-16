@@ -32,8 +32,15 @@ var (
 	ei string
 )
 
+type Me struct {
+	img        *ebiten.Image
+	startFrame int
+	x          float64
+	y          float64
+}
+
 type Game struct {
-	meImg    *ebiten.Image
+	meImg    Me
 	shotImg  [MaxShotNum]Shot
 	enemyImg [MaxEnemyNum]Enemy
 	input    *Input
@@ -44,21 +51,24 @@ func NewGame() *Game {
 	rand.Seed(time.Now().UnixNano())
 
 	windowX, windowY = ebiten.WindowSize()
-	rocketX = (float64(windowX) / 2) - 21
-	rocketY = float64(windowY) - 72
 
-	g := &Game{
-		input: NewInput(),
-		count: 0,
-	}
-
-	var err error
-	g.meImg, _, err = ebitenutil.NewImageFromFile("game/resource/img/rocket.png")
+	img, _, err := ebitenutil.NewImageFromFile("game/resource/img/rocket.png")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	x, y := g.meImg.Size()
+	g := &Game{
+		meImg: Me{
+			img:        img,
+			startFrame: 0,
+			x:          (float64(windowX) / 2) - 21,
+			y:          float64(windowY) - 72,
+		},
+		input: NewInput(),
+		count: 0,
+	}
+
+	x, y := g.meImg.img.Size()
 	fmt.Printf("x, y : %d, %d\n", x, y)
 
 	return g
@@ -93,7 +103,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprintf("shotCooltime:%d", shotCooltime), mplusbitmap.Gothic12r, 5, 73, color.White)
 
 	text.Draw(screen, fmt.Sprintf("WindowSize():%d, %d", windowX, windowY), mplusbitmap.Gothic12r, 5, 93, color.White)
-	text.Draw(screen, fmt.Sprintf("rocketX, rocketY:%d, %d", int(rocketX), int(rocketY)), mplusbitmap.Gothic12r, 5, 113, color.White)
+	text.Draw(screen, fmt.Sprintf("g.meImg.x, g.meImg.y:%d, %d", int(g.meImg.x), int(g.meImg.y)), mplusbitmap.Gothic12r, 5, 113, color.White)
 
 	text.Draw(screen, fmt.Sprintf("enemyImg:%#v", ei), mplusbitmap.Gothic12r, 350, 53, color.White)
 

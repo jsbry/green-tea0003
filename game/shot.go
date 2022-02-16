@@ -43,8 +43,8 @@ func (g *Game) drawShot(screen *ebiten.Image) {
 				g.shotImg[shotNum] = Shot{
 					img:        img,
 					startFrame: g.count,
-					x:          rocketX,
-					y:          rocketY,
+					x:          g.meImg.x,
+					y:          g.meImg.y,
 				}
 
 				shotNum++
@@ -77,12 +77,35 @@ func (g *Game) moveShot(screen *ebiten.Image) {
 			op.GeoM.Translate(v.x+12, v.y-40)
 
 			text.Draw(screen, fmt.Sprintf("shotNum: %d, shotX, shotY:%d, %d", shotNum, int(v.x+12), int(v.y-40)), mplusbitmap.Gothic12r, 5, 133+(20*shotNum), color.White)
+
+			isBreak := g.Intersect(v)
 			screen.DrawImage(v.img, op)
 
-			if v.y < 0 {
+			if isBreak || v.y < 0 {
 				g.shotImg[shotNum].img.Dispose()
 				g.shotImg[shotNum].img = nil
 			}
 		}
 	}
+}
+
+func (g *Game) Intersect(shot Shot) bool {
+	bx, by := shot.x, shot.y
+	bw, bh := shot.img.Size()
+
+	for enemyNum, v := range g.enemyImg {
+		if v.img != nil {
+			ax, ay := v.x, v.y
+			aw, ah := v.img.Size()
+
+			// https://qiita.com/zenwerk/items/7123d878a9ad4ecc291f
+			if (ax < bx+float64(bw)*SHOT_SCALE && ay < by+float64(bh)*SHOT_SCALE) && (ax+float64(aw)*ENEMY_SCALE > bx && ay+float64(ah)*ENEMY_SCALE > by) {
+				g.enemyImg[enemyNum].img.Dispose()
+				g.enemyImg[enemyNum].img = nil
+
+				return true
+			}
+		}
+	}
+	return false
 }
