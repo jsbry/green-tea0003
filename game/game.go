@@ -18,7 +18,7 @@ const (
 	LayoutHeight = 480
 
 	MaxShotNum  = 8
-	MaxEnemyNum = 16
+	MaxEnemyNum = 332
 )
 
 var (

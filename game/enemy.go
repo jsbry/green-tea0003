@@ -30,8 +30,10 @@ type Enemy struct {
 
 func (g *Game) drawEnemy(screen *ebiten.Image) {
 
-	if g.count%50 == 0 {
-		fmt.Printf("pop : %d,  %d\n", g.count, g.count%100)
+	if g.count%25 == 0 {
+		// Why:ときどき同時出現する
+		fmt.Printf("pop : %d\n", g.count)
+
 		img, _, err := ebitenutil.NewImageFromFile("game/resource/img/ufo.png")
 		if err != nil {
 			log.Fatal(err)
@@ -40,7 +42,7 @@ func (g *Game) drawEnemy(screen *ebiten.Image) {
 		g.enemyImg[enemyNum] = Enemy{
 			img:        img,
 			startFrame: g.count,
-			x:          float64(rand.Intn(windowX)),
+			x:          float64(rand.Intn(windowX - 60)),
 			y:          float64(rand.Intn(100) - 150),
 		}
 
